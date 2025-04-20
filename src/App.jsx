@@ -1,4 +1,4 @@
-import { useLoaderData } from "react-router-dom"
+import { Link, useLoaderData } from "react-router-dom"
 import PantCard from "./components/PantCard";
 import { useState } from "react";
 
@@ -13,7 +13,11 @@ function App() {
       <div className="md:grid md:grid-cols-2 gap-5">
         {pants.map(pant => <PantCard key={pant._id} pant={pant} setPants={setPants} />)}
       </div>
-
+      <div className="text-center my-6">
+        <Link to="/addPant">
+          <button className="btn btn-lg btn-soft btn-primary">Add Pant</button>
+        </Link>
+      </div>
     </div>
   )
 }

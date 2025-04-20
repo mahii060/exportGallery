@@ -7,6 +7,7 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import AddPant from './components/AddPant.jsx';
+import UpdatePant from './components/UpdatePant.jsx';
 
 const router = createBrowserRouter([
   {
@@ -19,8 +20,9 @@ const router = createBrowserRouter([
     element: <AddPant />,
   },
   {
-    path: "/updatePant",
-    element: <App />,
+    path: "/updatePant/:id",
+    element: <UpdatePant />,
+    loader: ({ params }) => fetch(`http://localhost:5000/pants/${params.id}`)
   },
 ]);
 
