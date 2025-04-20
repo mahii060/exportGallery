@@ -1,22 +1,18 @@
-import express from "express";
-import cors from "cors"
-import { MongoClient, ObjectId, ServerApiVersion } from 'mongodb'
-import 'dotenv/config';
+import express from "express"; // Importing Express.js
+import cors from "cors" // Importing CORS for enabling cross-origin requests
+import { MongoClient, ObjectId, ServerApiVersion } from 'mongodb' // Importing MongoDB client, ObjectId and API version
+import 'dotenv/config'; // Loading environment variables from .env file
 
-
-
-const app = express();
-const port = process.env.PORT || 5000;
+const app = express(); // Creating Express app instance
+const port = process.env.PORT || 5000; // Setting the port from environment variable or fallback to 5000
 
 // Middleware
-app.use(cors())
-app.use(express.json())
+app.use(cors()) // Enable CORS
+app.use(express.json()) // Enable JSON parsing for incoming requests
 
+const uri = process.env.MONGO_URI; // Getting MongoDB connection string from environment variables
 
-
-const uri = process.env.MONGO_URI;
-
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+// Creating MongoDB client instance with server API version configuration
 const client = new MongoClient(uri, {
     serverApi: {
         version: ServerApiVersion.v1,
@@ -27,73 +23,84 @@ const client = new MongoClient(uri, {
 
 async function run() {
     try {
-        // Connect the client to the server	(optional starting in v4.7)
+        // Connecting to MongoDB server
         await client.connect();
+
+        // Getting reference to "pants" collection from "pantCollection" database
         const pantCollection = client.db("pantCollection").collection("pants");
 
+        // GET all pants
         app.get('/pants', async (req, res) => {
-            const cursor = pantCollection.find()
-            const result = await cursor.toArray()
-            res.send(result)
+            const cursor = pantCollection.find() // Find all documents in the collection
+            const result = await cursor.toArray() // Convert documents to array
+            res.send(result) // Send response to client
         })
+
+        // GET a single pant by ID
         app.get('/pants/:id', async (req, res) => {
-            const id = req.params.id;
-            const query = { _id: new ObjectId(id) };
-            const pant = await pantCollection.findOne(query);
-            res.send(pant)
+            const id = req.params.id; // Extracting ID from request parameters
+            const query = { _id: new ObjectId(id) }; // Creating query object using ObjectId
+            const pant = await pantCollection.findOne(query); // Finding the matching document
+            res.send(pant) // Sending the found document
         })
 
+        // POST a new pant
         app.post('/pants', async (req, res) => {
-            const pant = req.body;
-            const result = await pantCollection.insertOne(pant)
-            res.send(result)
+            const pant = req.body; // Getting data from request body
+            const result = await pantCollection.insertOne(pant) // Inserting new document
+            res.send(result) // Sending insertion result
         })
 
+        // PUT (update) a pant by ID
         app.put('/pants/:id', async (req, res) => {
-            const id = req.params.id;
-            const pant = req.body;
-            const filter = { _id: new ObjectId(id) }
-            const options = { upsert: true };
+            const id = req.params.id; // Getting ID from request
+            const pant = req.body; // Getting updated data
+            const filter = { _id: new ObjectId(id) } // Creating filter using ID
+            const options = { upsert: true }; // If document not found, insert new one
+
+            // Creating update object with fields to update
             const updatePant = {
                 $set: {
-                    name: pant.name, //name, price, quantity, description, category, size, photo 
-                    price: pant.price,
-                    quantity: pant.quantity,
-                    description: pant.description,
-                    category: pant.category,
-                    size: pant.size,
-                    photo: pant.photo,
+                    name: pant.name, // Updating name
+                    price: pant.price, // Updating price
+                    quantity: pant.quantity, // Updating quantity
+                    description: pant.description, // Updating description
+                    category: pant.category, // Updating category
+                    size: pant.size, // Updating size
+                    photo: pant.photo, // Updating photo URL
                 },
             };
 
-            const result = await pantCollection.updateOne(filter, updatePant, options);
-            res.send(result)
-
+            const result = await pantCollection.updateOne(filter, updatePant, options); // Performing the update
+            res.send(result) // Sending result to client
         })
 
+        // DELETE a pant by ID
         app.delete('/pants/:id', async (req, res) => {
-            const id = req.params.id;
-            const query = { _id: new ObjectId(id) };
-            const result = await pantCollection.deleteOne(query);
-            res.send(result)
+            const id = req.params.id; // Getting ID from request
+            const query = { _id: new ObjectId(id) }; // Creating query object
+            const result = await pantCollection.deleteOne(query); // Deleting the document
+            res.send(result) // Sending result to client
         })
 
-
-        // Send a ping to confirm a successful connection
+        // Ping to confirm MongoDB connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
-        // Ensures that the client will close when you finish/error
+        // Optional: Close MongoDB connection (currently commented out to keep it alive)
         // await client.close();
     }
 }
+
+// Running the main function and handling errors
 run().catch(console.dir);
 
-
+// Root route
 app.get('/', (req, res) => {
-    res.send('export gallery server is running')
+    res.send('export gallery server is running') // Respond to root route
 })
 
+// Starting server on defined port
 app.listen(port, () => {
     console.log(`Export gallery server is running on port: ${port}`);
 })
