@@ -36,11 +36,40 @@ async function run() {
             const result = await cursor.toArray()
             res.send(result)
         })
+        app.get('/pants/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const pant = await pantCollection.findOne(query);
+            res.send(pant)
+        })
 
         app.post('/pants', async (req, res) => {
             const pant = req.body;
             const result = await pantCollection.insertOne(pant)
             res.send(result)
+        })
+
+        app.put('/pants/:id', async (req, res) => {
+            const id = req.params.id;
+            console.log(id);
+            const pant = req.body;
+            const filter = { _id: new ObjectId(id) }
+            const options = { upsert: true };
+            const updatePant = {
+                $set: {
+                    name: pant.name, //name, price, quantity, description, category, size, photo 
+                    price: pant.price,
+                    quantity: pant.quantity,
+                    description: pant.description,
+                    CanvasPattern: pant.category,
+                    size: pant.size,
+                    photo: pant.photo,
+                },
+            };
+
+            const result = await pantCollection.updateOne(filter, updatePant, options);
+            res.send(result)
+
         })
 
         app.delete('/pants/:id', async (req, res) => {
