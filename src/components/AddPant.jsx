@@ -30,8 +30,8 @@ const AddPant = () => {
                         title: "Pant added Successfully!",
                         icon: "success",
                     });
+                    form.reset()
                 }
-                console.log(data);
             })
     }
     return (
