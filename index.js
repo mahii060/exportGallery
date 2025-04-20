@@ -51,7 +51,6 @@ async function run() {
 
         app.put('/pants/:id', async (req, res) => {
             const id = req.params.id;
-            console.log(id);
             const pant = req.body;
             const filter = { _id: new ObjectId(id) }
             const options = { upsert: true };
@@ -61,7 +60,7 @@ async function run() {
                     price: pant.price,
                     quantity: pant.quantity,
                     description: pant.description,
-                    CanvasPattern: pant.category,
+                    category: pant.category,
                     size: pant.size,
                     photo: pant.photo,
                 },
